@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && gh-pages -d dist"
+    "deploy": "vite build && gh-pages -d dist -r https://github.com/jakeisreal/interview-schedule.git"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -22,4 +22,5 @@
     "tailwindcss": "^3.3.2",
     "vite": "^4.3.9"
   }
+
 }
