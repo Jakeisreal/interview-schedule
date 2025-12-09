@@ -4,31 +4,6 @@ import * as XLSX from 'xlsx';
 
 const ADMIN_PASSWORD = 'admin1234';
 
-const DEFAULT_APPLICANTS = [
-  {
-    id: 1,
-    name: '김철수',
-    birthDate: '1995-03-15',
-    phone: '010-1234-5678',
-    job: '프론트엔드 개발자',
-    interviewDate: '2025-12-01',
-    interviewTime: '10:00',
-    location: '본사 3층 면접실 A',
-    notes: '포트폴리오 및 자기소개서 지참'
-  },
-  {
-    id: 2,
-    name: '이영희',
-    birthDate: '1998-07-22',
-    phone: '010-2345-6789',
-    job: '데이터 분석가',
-    interviewDate: '2025-12-01',
-    interviewTime: '14:00',
-    location: '본사 3층 면접실 B',
-    notes: '프레젠테이션 준비'
-  }
-];
-
 const formatPhoneNumber = (value) => {
   const digits = (value || '').replace(/\D/g, '').slice(0, 11);
   if (digits.length <= 3) return digits;
@@ -96,7 +71,6 @@ export default function App() {
   });
   const [importError, setImportError] = useState('');
 
-  // 라우팅
   useEffect(() => {
     const handleHashChange = () => {
       setRoute(window.location.hash === '#/admin' ? 'admin' : 'search');
@@ -105,30 +79,32 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  // 초기 데이터 로드 (public/data.json → 실패 시 기본 데이터)
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.BASE_URL}data.json`);
-        if (!res.ok) throw new Error('fetch failed');
-        const data = await res.json();
-        const normalized = (data || []).map((item, idx) => ({
-          id: item.id ?? idx + 1,
-          name: item.name ?? '',
-          birthDate: normalizeDate(item.birthDate),
-          phone: item.phone ? formatPhoneNumber(item.phone) : '',
-          job: item.job ?? '',
-          interviewDate: normalizeDate(item.interviewDate),
-          interviewTime: normalizeTime(item.interviewTime),
-          location: item.location ?? '',
-          notes: item.notes ?? ''
-        }));
-        setApplicants(normalized.length ? normalized : DEFAULT_APPLICANTS);
-      } catch (err) {
-        setApplicants(DEFAULT_APPLICANTS);
+    const sampleData = [
+      {
+        id: 1,
+        name: '김철수',
+        birthDate: '1995-03-15',
+        phone: '010-1234-5678',
+        job: '프론트엔드 개발자',
+        interviewDate: '2025-12-01',
+        interviewTime: '10:00',
+        location: '본사 3층 면접실 A',
+        notes: '포트폴리오 및 자기소개서 지참'
+      },
+      {
+        id: 2,
+        name: '이영희',
+        birthDate: '1998-07-22',
+        phone: '010-2345-6789',
+        job: '데이터 분석가',
+        interviewDate: '2025-12-01',
+        interviewTime: '14:00',
+        location: '본사 3층 면접실 B',
+        notes: '프레젠테이션 준비'
       }
-    };
-    fetchData();
+    ];
+    setApplicants(sampleData);
   }, []);
 
   useEffect(() => {
@@ -247,26 +223,8 @@ export default function App() {
         '면접장소',
         '비고'
       ],
-      [
-        '김철수',
-        '1995-03-15',
-        '01012345678',
-        '프론트엔드 개발자',
-        '2025-12-01',
-        '10:00',
-        '본사 3층 면접실 A',
-        '포트폴리오 지참'
-      ],
-      [
-        '이영희',
-        '1998-07-22',
-        '010-2345-6789',
-        '데이터 분석가',
-        '2025-12-01',
-        '14:00',
-        '본사 3층 면접실 B',
-        '프레젠테이션 준비'
-      ]
+      ['김철수', '1995-03-15', '01012345678', '프론트엔드 개발자', '2025-12-01', '10:00', '본사 3층 면접실 A', '포트폴리오 지참'],
+      ['이영희', '1998-07-22', '010-2345-6789', '데이터 분석가', '2025-12-01', '14:00', '본사 3층 면접실 B', '프레젠테이션 준비']
     ];
     const ws = XLSX.utils.aoa_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -277,18 +235,6 @@ export default function App() {
     const link = document.createElement('a');
     link.href = url;
     link.download = 'interview-template.xlsx';
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleJsonDownload = () => {
-    const blob = new Blob([JSON.stringify(applicants, null, 2)], {
-      type: 'application/json'
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'data.json';
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -458,7 +404,9 @@ export default function App() {
             ) : (
               <div className="space-y-6">
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <h3 className="text-lg font-bold text-green-800 mb-2">면접 일정이 확인되었습니다</h3>
+                  <h3 className="text-lg font-bold text-green-800 mb-2">
+                    면접 일정이 확인되었습니다
+                  </h3>
                   <p className="text-green-700">{searchResult.name}님의 면접 정보입니다.</p>
                 </div>
 
@@ -478,6 +426,15 @@ export default function App() {
                     <div>
                       <p className="font-medium text-gray-700">면접 장소</p>
                       <p className="text-lg font-bold text-gray-900">{searchResult.location}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-blue-600 mt-1" />
+                      <p className="text-sm text-blue-900">
+                        위 기재된 면접시간은 예상시간이며 가급적 채용홈페이지상 안내된 시작시간에 맞춰 참석해주시길 바랍니다.
+                      </p>
                     </div>
                   </div>
 
@@ -538,14 +495,6 @@ export default function App() {
                 엑셀 업로드
                 <input type="file" accept=".xlsx,.xls" onChange={handleXlsxUpload} className="hidden" />
               </label>
-              <button
-                onClick={handleJsonDownload}
-                className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-800 rounded hover:bg-green-100"
-                title="다운로드한 data.json을 리포의 public/data.json에 교체 후 커밋/배포하면 모든 사용자가 동일 데이터로 조회합니다."
-              >
-                <Download className="w-4 h-4" />
-                JSON 다운로드
-              </button>
               {importError && <span className="text-sm text-red-600">{importError}</span>}
             </div>
 
